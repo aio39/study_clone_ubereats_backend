@@ -6,7 +6,7 @@ export class CreateAccountInput extends PickType(User, [
   'email',
   'password',
   'role',
-]) {}
+]) {} // db에서는 숫자로 저장됨.
 
 @ObjectType()
 export class CreateAccountOutput {
