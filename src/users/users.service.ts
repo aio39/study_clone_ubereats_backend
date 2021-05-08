@@ -49,7 +49,10 @@ export class UsersService {
     password,
   }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
     try {
-      const user = await this.users.findOne({ email });
+      const user = await this.users.findOne(
+        { email },
+        { select: ['password', 'id'] },
+      );
       if (!user) {
         return {
           ok: false,
@@ -93,5 +96,23 @@ export class UsersService {
     }
     if (password) user.password = password;
     return this.users.save(user);
+  }
+
+  async verifyEmail(code: string): Promise<boolean> {
+    try {
+      const verification = await this.verification.findOne(
+        { code },
+        { relations: ['user'] }, // Join 모든 데이터 가져오기
+        // { loadRelationIds: true }, // join해서 userId만 가져오기
+      );
+      if (verification) {
+        verification.user.verified = true;
+        this.users.save(verification.user);
+        return true;
+      }
+      throw new Error();
+    } catch (error) {
+      return false;
+    }
   }
 }

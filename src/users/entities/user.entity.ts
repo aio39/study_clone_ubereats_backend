@@ -28,7 +28,7 @@ export class User extends CoreEntity {
   @IsEmail()
   email: string;
 
-  @Column()
+  @Column({ select: false }) // find를 할 경우 return 객체에 포함이 되지 않는다.
   @Field((type) => String)
   password: string;
 
@@ -44,11 +44,14 @@ export class User extends CoreEntity {
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword(): Promise<void> {
-    try {
-      this.password = await bcrypt.hash(this.password, 10);
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException();
+    if (this.password) {
+      // save로 전달된 객체에 password가 있는지 체크
+      try {
+        this.password = await bcrypt.hash(this.password, 10);
+      } catch (error) {
+        console.log(error);
+        throw new InternalServerErrorException();
+      }
     }
   }
 
