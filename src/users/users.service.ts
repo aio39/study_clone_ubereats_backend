@@ -8,10 +8,13 @@ import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edir-profile.dto';
+import { Verification } from './entities/verification.entity';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
+    @InjectRepository(Verification)
+    private readonly verification: Repository<Verification>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -25,8 +28,16 @@ export class UsersService {
       if (exists) {
         return { ok: false, error: 'There is a user with that email already' };
       }
+
       // save와 create의 역할 주의
-      await this.users.save(this.users.create({ email, password, role }));
+      const user = await this.users.save(
+        this.users.create({ email, password, role }),
+      );
+      await this.verification.save(
+        this.verification.create({
+          user,
+        }),
+      );
       return { ok: true };
     } catch (e) {
       return { ok: false, error: "couldn't create account" };
@@ -75,7 +86,11 @@ export class UsersService {
 
     // update vs save , update 메소드는 BeforeUpdate를 실행하지 않는다. 빠르지만...
     const user = await this.users.findOne(userId);
-    if (email) user.email = email;
+    if (email) {
+      user.email = email;
+      user.verified = false;
+      await this.verification.save(this.verification.create({ user }));
+    }
     if (password) user.password = password;
     return this.users.save(user);
   }
