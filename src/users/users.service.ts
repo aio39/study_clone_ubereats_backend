@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
+import { EditProfileInput } from './dtos/edir-profile.dto';
 @Injectable()
 export class UsersService {
   constructor(
@@ -65,5 +66,17 @@ export class UsersService {
 
   async findById(id: number): Promise<User> {
     return this.users.findOne({ id });
+  }
+
+  async editProfile(userId: number, { email, password }: EditProfileInput) {
+    // 처음 부터 구조 분해 할당으로 받으면 쿼리 요청에서 undefined를 보내게됨.
+    // 또한 beforeInsert와 Update는 다르니 주의
+    // return this.users.update(userId, { ...editProfile });
+
+    // update vs save , update 메소드는 BeforeUpdate를 실행하지 않는다. 빠르지만...
+    const user = await this.users.findOne(userId);
+    if (email) user.email = email;
+    if (password) user.password = password;
+    return this.users.save(user);
   }
 }
