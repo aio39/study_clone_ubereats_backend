@@ -1,20 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateAccountInput } from './dtos/create-account.dto';
-import { LoginInput } from './dtos/login.dto';
+import {
+  CreateAccountInput,
+  CreateAccountOutput,
+} from './dtos/create-account.dto';
+import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
-import { EditProfileInput } from './dtos/edir-profile.dto';
+import { EditProfileInput, EditProfileOutput } from './dtos/edir-profile.dto';
 import { Verification } from './entities/verification.entity';
+import { UserProfileOutput } from './dtos/user-profile.dto';
+import { VerifyEmailOutput } from './dtos/verify-email.dto';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Verification)
-    private readonly verification: Repository<Verification>,
+    private readonly verifications: Repository<Verification>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -22,7 +27,7 @@ export class UsersService {
     email,
     password,
     role,
-  }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
+  }: CreateAccountInput): Promise<CreateAccountOutput> {
     try {
       const exists = await this.users.findOne({ email });
       if (exists) {
@@ -33,8 +38,8 @@ export class UsersService {
       const user = await this.users.save(
         this.users.create({ email, password, role }),
       );
-      await this.verification.save(
-        this.verification.create({
+      await this.verifications.save(
+        this.verifications.create({
           user,
         }),
       );
@@ -44,10 +49,7 @@ export class UsersService {
     }
   }
 
-  async login({
-    email,
-    password,
-  }: LoginInput): Promise<{ ok: boolean; error?: string; token?: string }> {
+  async login({ email, password }: LoginInput): Promise<LoginOutput> {
     try {
       const user = await this.users.findOne(
         { email },
@@ -78,29 +80,51 @@ export class UsersService {
     }
   }
 
-  async findById(id: number): Promise<User> {
-    return this.users.findOne({ id });
+  async findById(id: number): Promise<UserProfileOutput> {
+    try {
+      const user = await this.users.findOne({ id });
+      if (user) {
+        return {
+          ok: true,
+          user: user,
+        };
+      }
+    } catch (error) {
+      return { ok: false, error: 'User Not Found' };
+    }
   }
 
-  async editProfile(userId: number, { email, password }: EditProfileInput) {
+  async editProfile(
+    userId: number,
+    { email, password }: EditProfileInput,
+  ): Promise<EditProfileOutput> {
     // 처음 부터 구조 분해 할당으로 받으면 쿼리 요청에서 undefined를 보내게됨.
     // 또한 beforeInsert와 Update는 다르니 주의
     // return this.users.update(userId, { ...editProfile });
 
     // update vs save , update 메소드는 BeforeUpdate를 실행하지 않는다. 빠르지만...
-    const user = await this.users.findOne(userId);
-    if (email) {
-      user.email = email;
-      user.verified = false;
-      await this.verification.save(this.verification.create({ user }));
+    try {
+      const user = await this.users.findOne(userId);
+      if (email) {
+        user.email = email;
+        user.verified = false;
+        await this.verifications.save(this.verifications.create({ user }));
+      }
+      if (password) {
+        user.password = password;
+      }
+      await this.users.save(user);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return { ok: false, error: 'Could not update profile.' };
     }
-    if (password) user.password = password;
-    return this.users.save(user);
   }
 
-  async verifyEmail(code: string): Promise<boolean> {
+  async verifyEmail(code: string): Promise<VerifyEmailOutput> {
     try {
-      const verification = await this.verification.findOne(
+      const verification = await this.verifications.findOne(
         { code },
         { relations: ['user'] }, // Join 모든 데이터 가져오기
         // { loadRelationIds: true }, // join해서 userId만 가져오기
@@ -108,11 +132,11 @@ export class UsersService {
       if (verification) {
         verification.user.verified = true;
         this.users.save(verification.user);
-        return true;
+        return { ok: true };
       }
-      throw new Error();
+      return { ok: false, error: 'Verification not found.' };
     } catch (error) {
-      return false;
+      return { ok: false, error };
     }
   }
 }
