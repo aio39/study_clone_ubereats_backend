@@ -7,11 +7,17 @@ import { Verification } from './entities/verification.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { MailService } from 'src/mail/mail.service';
 
-const mockRepository = {
+// const mockRepository = {
+//   findOne: jest.fn(),
+//   save: jest.fn(),
+//   create: jest.fn(),
+// };
+// 객체로 반환해주면 두개의 레포지토리 Mock이 같은 객체를 참조함, 함수 사용 횟수를 체크할때 문제가 생김.
+const mockRepository = () => ({
   findOne: jest.fn(),
   save: jest.fn(),
   create: jest.fn(),
-};
+});
 
 const mockJwtService = {
   sign: jest.fn(),
@@ -34,11 +40,11 @@ describe('UsersService', () => {
         UsersService,
         {
           provide: getRepositoryToken(User),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: getRepositoryToken(Verification),
-          useValue: mockRepository,
+          useValue: mockRepository(),
         },
         {
           provide: JwtService,
@@ -59,21 +65,31 @@ describe('UsersService', () => {
   });
 
   describe('createAccount', () => {
+    const createAccountArgs = {
+      email: '',
+      password: '',
+      role: 0,
+    };
     it('should fail if user exists', async () => {
       usersRepository.findOne.mockResolvedValue({
         id: 1,
         email: 'dsadsa',
       });
-      const result = await service.createAccount({
-        email: '',
-        password: '',
-        role: 0,
-      });
+      const result = await service.createAccount(createAccountArgs);
 
       expect(result).toMatchObject({
         ok: false,
         error: 'There is a user with that email already',
       });
+    });
+    it('should create a new suer', async () => {
+      usersRepository.findOne.mockResolvedValue(undefined);
+      usersRepository.create.mockReturnValue(createAccountArgs);
+      await service.createAccount(createAccountArgs);
+      expect(usersRepository.create).toHaveBeenCalledTimes(1); // 레포지토리 mock을 생성할때 같은 객체를 참조하지 않도록 주의
+      expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(createAccountArgs);
     });
   });
 
