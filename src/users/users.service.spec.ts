@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getTreeRepository, Repository } from 'typeorm';
-import { UsersService } from './users.service';
+import { UserService } from './users.service';
 import { User } from './entities/user.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Verification } from './entities/verification.entity';
@@ -21,7 +21,7 @@ const mockRepository = () => ({
 
 const mockJwtService = {
   sign: jest.fn(),
-  verify: jest.fn,
+  verify: jest.fn(),
 };
 
 const mockMailService = {
@@ -30,14 +30,16 @@ const mockMailService = {
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
-describe('UsersService', () => {
-  let service: UsersService;
+describe('UserService', () => {
+  let service: UserService;
   let usersRepository: MockRepository<User>;
+  let verificationsRepository: MockRepository<Verification>;
+  let mailService: MailService;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       providers: [
-        UsersService,
+        UserService,
         {
           provide: getRepositoryToken(User),
           useValue: mockRepository(),
@@ -56,8 +58,10 @@ describe('UsersService', () => {
         },
       ],
     }).compile();
-    service = module.get<UsersService>(UsersService);
+    service = module.get<UserService>(UserService);
+    mailService = module.get<MailService>(MailService);
     usersRepository = module.get(getRepositoryToken(User));
+    verificationsRepository = module.get(getRepositoryToken(Verification));
   });
 
   it('should be defined', () => {
@@ -66,30 +70,58 @@ describe('UsersService', () => {
 
   describe('createAccount', () => {
     const createAccountArgs = {
-      email: '',
-      password: '',
+      email: 'bs@email.com',
+      password: 'bs.password',
       role: 0,
     };
+
     it('should fail if user exists', async () => {
       usersRepository.findOne.mockResolvedValue({
         id: 1,
-        email: 'dsadsa',
+        email: '',
       });
       const result = await service.createAccount(createAccountArgs);
-
       expect(result).toMatchObject({
         ok: false,
         error: 'There is a user with that email already',
       });
     });
-    it('should create a new suer', async () => {
+
+    it('should create a new user', async () => {
       usersRepository.findOne.mockResolvedValue(undefined);
       usersRepository.create.mockReturnValue(createAccountArgs);
-      await service.createAccount(createAccountArgs);
-      expect(usersRepository.create).toHaveBeenCalledTimes(1); // 레포지토리 mock을 생성할때 같은 객체를 참조하지 않도록 주의
+      usersRepository.save.mockResolvedValue(createAccountArgs);
+      verificationsRepository.create.mockReturnValue({
+        user: createAccountArgs,
+      });
+      verificationsRepository.save.mockResolvedValue({
+        code: 'code',
+      });
+
+      const result = await service.createAccount(createAccountArgs);
+
+      expect(usersRepository.create).toHaveBeenCalledTimes(1);
       expect(usersRepository.create).toHaveBeenCalledWith(createAccountArgs);
+
       expect(usersRepository.save).toHaveBeenCalledTimes(1);
       expect(usersRepository.save).toHaveBeenCalledWith(createAccountArgs);
+
+      expect(verificationsRepository.create).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.create).toHaveBeenCalledWith({
+        user: createAccountArgs,
+      });
+
+      expect(verificationsRepository.save).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.save).toHaveBeenCalledWith({
+        user: createAccountArgs,
+      });
+
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledTimes(1);
+      expect(mailService.sendVerificationEmail).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+      );
+      expect(result).toEqual({ ok: true });
     });
   });
 
