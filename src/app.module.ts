@@ -55,6 +55,7 @@ import { Category } from './common/entities/category.entity';
       context: ({ req }) => ({ user: req['user'] }),
     }),
     UsersModule,
+    RestaurantModule,
     JwtModule.forRoot({ privateKey: process.env.SECRET_KEY }),
     MailModule.forRoot({
       apiKey: process.env.MAILGUN_API_KEY,
