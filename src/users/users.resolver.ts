@@ -9,13 +9,13 @@ import {
 import { UserProfileInput, UserProfileOutput } from './dtos/user-profile.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
-import { UsersService } from './users.service';
+import { UserService } from './users.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/edir-profile.dto';
 import { VerifyEmailOutput, VerityEmailInput } from './dtos/verify-email.dto';
 
 @Resolver((of) => User)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UserService) {}
 
   @Mutation((returns) => CreateAccountOutput)
   async createAccount(
