@@ -40,6 +40,8 @@ export class Restaurant extends CoreEntity {
   User;
 
   @Field((type) => User) // 카테고리를 지울 때 레스토랑은 지우지 않는다.
-  @ManyToOne((type) => User, (user) => user.restaurants)
+  @ManyToOne((type) => User, (user) => user.restaurants, {
+    onDelete: 'CASCADE',
+  })
   owner: User;
 }
