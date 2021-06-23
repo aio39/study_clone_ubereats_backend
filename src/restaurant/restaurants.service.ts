@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Field } from '@nestjs/graphql';
 import { InjectRepository } from '@nestjs/typeorm';
 import { number } from 'joi';
 import { Category } from 'src/common/entities/category.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
@@ -117,6 +117,19 @@ export class RestaurantService {
       await this.restaurants.delete(restaurantId);
     } catch {
       return { ok: false, error: 'Could not delete' };
+    }
+  }
+
+  async allCategories(): Promise<AllCategoriesOutput> {
+    try {
+      const categories = await this.categories.find();
+
+      return { ok: true, categories };
+    } catch {
+      return {
+        ok: false,
+        error: 'Could not load categories',
+      };
     }
   }
 }
