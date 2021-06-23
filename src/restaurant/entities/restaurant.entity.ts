@@ -3,7 +3,13 @@ import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
 import { Category } from 'src/common/entities/category.entity';
 import { CoreEntity } from 'src/common/entities/core.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  RelationId,
+} from 'typeorm';
 
 // relation 지정 후에  graphql의
 // ObjectTYpe과 InputType이 같은 이름을 사용하지 않도록  InputType 첫번쨰 매개변수 추가
@@ -44,4 +50,7 @@ export class Restaurant extends CoreEntity {
     onDelete: 'CASCADE',
   })
   owner: User;
+
+  @RelationId((restaurant: Restaurant) => restaurant.owner)
+  ownerId: number;
 }
