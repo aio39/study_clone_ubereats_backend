@@ -6,6 +6,7 @@ import {
   Mutation,
   ResolveField,
   Int,
+  Parent,
 } from '@nestjs/graphql';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
@@ -76,8 +77,10 @@ export class CategoryResolver {
 
   //  매 Request 마다 계산해서 커스텀 Filed를 만들어줌.
   @ResolveField((type) => Int)
-  restaurantCount(): number {
-    return 80;
+  restaurantCount(@Parent() category: Category): Promise<number> {
+    console.log(category);
+    //  await를 안 붙여도 됨
+    return this.restaurantService.countRestaurants(category);
   }
 
   @Query((type) => AllCategoriesOutput)
