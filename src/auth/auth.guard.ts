@@ -9,6 +9,7 @@ export class AuthGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
   canActivate(context: ExecutionContext) {
     // console.log(context);
+    //  reflector는 metadata를 get 할 수 있다.
     const roles = this.reflector.get<AllowedRoles>(
       'roles',
       context.getHandler(),
@@ -21,7 +22,7 @@ export class AuthGuard implements CanActivate {
     if (!user) {
       return false;
     }
-    if (roles.includes['Any']) {
+    if (roles.includes('Any')) {
       return true;
     }
 

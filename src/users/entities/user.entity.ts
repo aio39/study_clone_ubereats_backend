@@ -14,7 +14,7 @@ import { Restaurant } from 'src/restaurant/entities/restaurant.entity';
 
 export enum UserRole {
   Client = 'Client',
-  Owner = ' Owner',
+  Owner = 'Owner',
   Delivery = 'Delivery',
 }
 
