@@ -12,11 +12,13 @@ import { User } from './entities/user.entity';
 import { UserService } from './users.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/edir-profile.dto';
 import { VerifyEmailOutput, VerityEmailInput } from './dtos/verify-email.dto';
+import { Role } from 'src/auth/role.decorator';
 
 @Resolver((of) => User)
 export class UsersResolver {
   constructor(private readonly usersService: UserService) {}
 
+  // Role x -> Public
   @Mutation((returns) => CreateAccountOutput)
   async createAccount(
     @Args('input') createAccountInput: CreateAccountInput,
@@ -30,11 +32,12 @@ export class UsersResolver {
   }
 
   @Query((returns) => User)
-  @UseGuards(AuthGuard)
+  @Role(['Any'])
   me(@AuthUser() authUser: User) {
     return authUser;
   }
   @Query((returns) => UserProfileOutput)
+  @Role(['Any'])
   @UseGuards(AuthGuard)
   async userProfile(
     @Args() userProfileInput: UserProfileInput,
@@ -42,8 +45,8 @@ export class UsersResolver {
     return this.usersService.findById(userProfileInput.userId);
   }
 
-  @UseGuards(AuthGuard)
   @Mutation((returns) => EditProfileOutput)
+  @Role(['Any'])
   async editProfile(
     @AuthUser() authUser: User,
     @Args('input') editProfileInput: EditProfileInput,
