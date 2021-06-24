@@ -2,11 +2,13 @@ import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
 import { Category } from 'src/common/entities/category.entity';
 import { CoreEntity } from 'src/common/entities/core.entity';
+import { Dish } from 'src/common/entities/dish.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
@@ -43,7 +45,6 @@ export class Restaurant extends CoreEntity {
     onDelete: 'SET NULL',
   })
   category: Category;
-  User;
 
   @Field((type) => User) // 카테고리를 지울 때 레스토랑은 지우지 않는다.
   @ManyToOne((type) => User, (user) => user.restaurants, {
@@ -53,4 +54,8 @@ export class Restaurant extends CoreEntity {
 
   @RelationId((restaurant: Restaurant) => restaurant.owner)
   ownerId: number;
+
+  @Field((type) => [Dish])
+  @OneToMany((type) => Dish, (dish) => dish.restaurant)
+  menu: Dish[];
 }
