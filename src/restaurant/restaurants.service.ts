@@ -160,7 +160,12 @@ export class RestaurantService {
       });
       category.restaurants = restaurants;
       const totalResults = await this.countRestaurants(category);
-      return { ok: true, category, totalPages: Math.ceil(totalResults / 25) };
+      return {
+        ok: true,
+        category,
+        totalPages: Math.ceil(totalResults / 25),
+        restaurants,
+      };
     } catch {
       return { ok: false, error: 'Could not load category' };
     }
