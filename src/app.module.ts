@@ -18,8 +18,8 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { Verification } from './users/entities/verification.entity';
 import { MailModule } from './mail/mail.module';
-import { Category } from './common/entities/category.entity';
-import { Dish } from './common/entities/dish.entity';
+import { Category } from './restaurant/dtos/category.entity';
+import { Dish } from './restaurant/dtos/dish.entity';
 
 @Module({
   imports: [

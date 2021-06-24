@@ -4,7 +4,7 @@ import {
   PaginationInput,
   PaginationOutput,
 } from 'src/common/dtos/pagination.dto';
-import { Category } from 'src/common/entities/category.entity';
+import { Category } from 'src/restaurant/dtos/category.entity';
 import { Restaurant } from '../entities/restaurant.entity';
 
 @InputType()

@@ -1,8 +1,8 @@
 import { Field, InputType, Int, ObjectType } from '@nestjs/graphql';
 import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
-import { Category } from 'src/common/entities/category.entity';
+import { Category } from 'src/restaurant/dtos/category.entity';
 import { CoreEntity } from 'src/common/entities/core.entity';
-import { Dish } from 'src/common/entities/dish.entity';
+import { Dish } from 'src/restaurant/dtos/dish.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,

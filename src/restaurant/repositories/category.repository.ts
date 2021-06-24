@@ -1,4 +1,4 @@
-import { Category } from 'src/common/entities/category.entity';
+import { Category } from 'src/restaurant/dtos/category.entity';
 import { EntityRepository, Repository } from 'typeorm';
 
 // NOTE module에서는 이 레포지토리를 import

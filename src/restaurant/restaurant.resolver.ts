@@ -10,7 +10,12 @@ import {
 } from '@nestjs/graphql';
 import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
-import { Category } from 'src/common/entities/category.entity';
+import {
+  CreateDishInput,
+  CreateDishOutput,
+} from 'src/restaurant/dtos/create-dish.dto';
+import { Category } from 'src/restaurant/dtos/category.entity';
+import { Dish } from 'src/restaurant/dtos/dish.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { CategoryInput, CategoryOutput } from './dtos/category.dto';
@@ -121,5 +126,19 @@ export class CategoryResolver {
     @Args('input') categoryInput: CategoryInput,
   ): Promise<CategoryOutput> {
     return this.restaurantService.findCategoryBySlug(categoryInput);
+  }
+}
+
+@Resolver((of) => Dish)
+export class DishResolver {
+  constructor(private readonly restaurantService: RestaurantService) {}
+
+  @Mutation((type) => CreateDishOutput)
+  @Role(['Owner'])
+  createDish(
+    @AuthUser() owner: User,
+    @Args('input') createDishInput: CreateDishInput,
+  ) {
+    return this.restaurantService.createDish(owner, createDishInput);
   }
 }
