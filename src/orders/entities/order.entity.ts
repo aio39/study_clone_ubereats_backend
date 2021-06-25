@@ -52,9 +52,9 @@ export class Order extends CoreEntity {
   @JoinTable() //owning 쪽에 한번만 사용.
   dishes: Dish[];
 
-  @Column()
-  @Field((type) => Float)
-  total: number;
+  @Column({ nullable: true })
+  @Field((type) => Float, { nullable: true })
+  total?: number;
 
   @Column({ type: 'enum', enum: OrderStatus })
   @Field((type) => OrderStatus)
