@@ -12,6 +12,7 @@ import {
   PrimaryGeneratedColumn,
   RelationId,
 } from 'typeorm';
+import { Order } from 'src/orders/entities/order.entity';
 
 // relation 지정 후에  graphql의
 // ObjectTYpe과 InputType이 같은 이름을 사용하지 않도록  InputType 첫번쨰 매개변수 추가
@@ -51,6 +52,10 @@ export class Restaurant extends CoreEntity {
     onDelete: 'CASCADE',
   })
   owner: User;
+
+  @Field((type) => [Order])
+  @OneToMany((type) => Order, (order) => order.restaurant)
+  orders: Order[];
 
   @RelationId((restaurant: Restaurant) => restaurant.owner)
   ownerId: number;

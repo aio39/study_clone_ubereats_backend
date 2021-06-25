@@ -20,6 +20,8 @@ import { Verification } from './users/entities/verification.entity';
 import { MailModule } from './mail/mail.module';
 import { Category } from './restaurant/dtos/category.entity';
 import { Dish } from './restaurant/dtos/dish.entity';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/entities/order.entity';
 
 @Module({
   imports: [
@@ -49,7 +51,7 @@ import { Dish } from './restaurant/dtos/dish.entity';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod', // TypeOrm의 Entity에 맞춰 실제 DB에 Migration
       logging: process.env.NODE_ENV !== 'prod',
-      entities: [User, Verification, Restaurant, Category, Dish],
+      entities: [User, Verification, Restaurant, Category, Dish, Order],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
@@ -64,6 +66,7 @@ import { Dish } from './restaurant/dtos/dish.entity';
     UsersModule,
     RestaurantModule,
     AuthModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [],
