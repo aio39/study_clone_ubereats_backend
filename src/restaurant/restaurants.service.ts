@@ -31,6 +31,8 @@ import {
 } from './dtos/search-restaurnat.dto';
 import { Restaurant } from './entities/restaurant.entity';
 import { CategoryRepository } from './repositories/category.repository';
+import { EditDishInput, EditDishOutput } from './dtos/edit-dish.dto';
+import { DeleteDishInput, DeleteDishOutput } from './dtos/delete-dish.dto';
 
 @Injectable() // service는 resolver에 inject하고 repository는 service에 inject해서 bd 접근가능
 export class RestaurantService {
@@ -271,6 +273,51 @@ export class RestaurantService {
         ok: false,
         error: 'Could not create dish',
       };
+    }
+  }
+
+  async editDish(
+    owner: User,
+    editDishInput: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const dish = await this.dishes.findOne(editDishInput.dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return { ok: false, error: 'Dish not found' };
+      }
+      if (dish.restaurant.ownerId !== owner.id) {
+        return { ok: false, error: "You can't do that" };
+      }
+
+      await this.dishes.save([{ id: editDishInput.dishId, ...editDishInput }]);
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Could not delete dish' };
+    }
+  }
+
+  async deleteDish(
+    owner: User,
+    { dishId }: DeleteDishInput,
+  ): Promise<DeleteDishOutput> {
+    try {
+      const dish = await this.dishes.findOne(dishId, {
+        relations: ['restaurant'],
+      });
+      if (!dish) {
+        return { ok: false, error: 'Dish not found' };
+      }
+      if (dish.restaurant.ownerId !== owner.id) {
+        return { ok: false, error: "You can't do that" };
+      }
+
+      await this.dishes.delete(dishId);
+      return { ok: true };
+    } catch (error) {
+      console.error(error);
+      return { ok: false, error: 'Could not delete dish' };
     }
   }
 }
