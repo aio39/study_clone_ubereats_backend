@@ -6,9 +6,9 @@ import { CoreEntity } from '../../common/entities/core.entity';
 
 @InputType('DishChoiceInputType', { isAbstract: true })
 @ObjectType()
-class DishChoice {
-  @Field((type) => [String])
-  name: string[];
+export class DishChoice {
+  @Field((type) => String)
+  name: string;
 
   @Field((type) => Int, { nullable: true })
   extra?: number;
