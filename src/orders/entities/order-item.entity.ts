@@ -26,5 +26,5 @@ export class OrderItem extends CoreEntity {
 
   @Field((type) => [DishOption], { nullable: true })
   @Column({ type: 'json', nullable: true }) // mysql postgreSQL
-  options: DishOption[];
+  options?: OrderItemOption[];
 }
