@@ -66,12 +66,10 @@ import { OrderItem } from './orders/entities/order-item.entity';
       installSubscriptionHandlers: true, // NOTE ws 활성화
       autoSchemaFile: true,
       context: ({ req, connection }) => {
-        if (req) {
-          ({ user: req['user'] });
-        } else {
-          //  NOTE ws의 connection의 연결은 첫 연결때에만 발생
-          console.log(connection);
-        }
+        const TOKEN_KEY = 'x-jwt';
+        return {
+          token: req ? req.headers[TOKEN_KEY] : connection.context[TOKEN_KEY],
+        };
       },
     }),
     JwtModule.forRoot({ privateKey: process.env.SECRET_KEY }),
@@ -88,11 +86,12 @@ import { OrderItem } from './orders/entities/order-item.entity';
   controllers: [],
   providers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(JwtMiddleware).forRoutes({
-      path: '/graphql',
-      method: RequestMethod.POST,
-    });
-  }
-}
+export class AppModule {}
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer.apply(JwtMiddleware).forRoutes({
+//       path: '/graphql',
+//       method: RequestMethod.POST,
+//     });
+//   }
+// }
