@@ -63,8 +63,16 @@ import { OrderItem } from './orders/entities/order-item.entity';
       ],
     }),
     GraphQLModule.forRoot({
+      installSubscriptionHandlers: true, // NOTE ws 활성화
       autoSchemaFile: true,
-      context: ({ req }) => ({ user: req['user'] }),
+      context: ({ req, connection }) => {
+        if (req) {
+          ({ user: req['user'] });
+        } else {
+          //  NOTE ws의 connection의 연결은 첫 연결때에만 발생
+          console.log(connection);
+        }
+      },
     }),
     JwtModule.forRoot({ privateKey: process.env.SECRET_KEY }),
     MailModule.forRoot({
