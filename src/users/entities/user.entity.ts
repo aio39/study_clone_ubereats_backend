@@ -11,7 +11,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { IsBoolean, IsEmail, IsEnum, IsString } from 'class-validator';
 import { Restaurant } from 'src/restaurant/entities/restaurant.entity';
 import { Order } from 'src/orders/entities/order.entity';
-import { Payment } from 'src/payments/entities/payment.dto';
+import { Payment } from 'src/payments/entities/payment.entitiy';
 // type UserRole = 'client' | 'owner' | 'delivery';
 
 export enum UserRole {

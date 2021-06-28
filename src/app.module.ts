@@ -24,7 +24,7 @@ import { OrdersModule } from './orders/orders.module';
 import { Order } from './orders/entities/order.entity';
 import { OrderItem } from './orders/entities/order-item.entity';
 import { PaymentsModule } from './payments/payments.module';
-import { Payment } from './payments/entities/payment.dto';
+import { Payment } from './payments/entities/payment.entitiy';
 
 @Module({
   imports: [
